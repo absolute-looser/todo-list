@@ -1,59 +1,38 @@
-var myNodelist = document.getElementsByTagName("LI");
-var i;
-for (i = 0; i < myNodelist.length; i++) {
-  var span = document.createElement("SPAN");
-  var txt = document.createTextNode("\u00D7");
-  span.className = "close";
-  span.appendChild(txt);
-  myNodelist[i].appendChild(span);
-}
-
-var close = document.getElementsByClassName("close");
-var i;
-for (i = 0; i < close.length; i++) {
-  close[i].onclick = function () {
-    var div = this.parentElement;
-    div.style.display = "none";
+const express = require("express");
+const bodyParser = require("body-parser");
+const app = express();
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static("public"));
+app.set("view engine", "ejs");
+let item = [];
+let work = [];
+app.get("/", function (req, res) {
+  var date = new Date();
+  var option = {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
   };
-}
-
-var list = document.querySelector("ul");
-list.addEventListener(
-  "click",
-  function (ev) {
-    if (ev.target.tagName === "LI") {
-      ev.target.classList.toggle("checked");
-    }
-  },
-  false
-);
-
-function newElement() {
-  var li = document.createElement("li");
-  var inputValue = document.getElementById("myInput").value;
-  var t = document.createTextNode(inputValue);
-  li.appendChild(t);
-  if (inputValue === "") {
-    alert("You must write something!");
+  var day = date.toLocaleString("hi-IN", option);
+  res.render("todo", { listTitle: day, newItem: item });
+});
+app.post("/", function (req, res) {
+  console.log(req.body.list);
+  if (req.body.list === "Work") {
+    work.push(req.body.data);
+    res.redirect("/work");
   } else {
-    document.getElementById("myUL").appendChild(li);
+    item.push(req.body.data);
+    res.redirect("/");
   }
-  document.getElementById("myInput").value = "";
-
-  var span = document.createElement("SPAN");
-  var txt = document.createTextNode("\u00D7");
-  span.className = "close";
-  span.appendChild(txt);
-  li.appendChild(span);
-
-  for (i = 0; i < close.length; i++) {
-    close[i].onclick = function () {
-      var div = this.parentElement;
-      div.style.display = "none";
-    };
-  }
-}
-function removeAll() {
-  var lst = document.getElementsByTagName("ul");
-  lst[0].innerHTML = "";
-}
+});
+app.get("/work", function (req, res) {
+  res.render("todo", { listTitle: "Work", newItem: work });
+});
+app.post("/work", function (req, res) {
+  work.push(req.body.data);
+  res.redirect("/work");
+});
+app.listen(3000, function () {
+  console.log("server is running at port 3000");
+});
